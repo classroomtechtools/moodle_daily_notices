@@ -29,21 +29,18 @@ class Teacher_Notices(ExtendMoodleDatabaseToAutoEmailer):
         Called by init
         """
         super().define()
-        self.sender = 'DragonNet Admin <lcssisadmin@student.ssis-suzhou.net>'
-        self.agents = ['adammorris@ssis-suzhou.net']
+        self.sender = 'Name <name@example.com>'
+        self.agents = ['someone@example.com']
         self.agent_map = {
-            'rebeccalouiseclentwo@ssis-suzhou.net':['Whole School', 'Elementary'],
-            'yoonahlee@ssis-suzhou.net':['Whole School', 'Elementary'],
-            'carmenmurray@ssis-suzhou.net':['Whole School', 'Elementary'],
-            'neilmarshallinns@ssis-suzhou.net':['Whole School', 'Elementary'],
-            'nicholaslittle@ssis-suzhou.net':['Whole School', 'Secondary'],
+            'one@example.com':['Whole School', 'Elementary'],
+            'two@example.com':['Whole School', 'Elementary'],
             }
         self.search_date = "next day"
         self.content_field = 'Full Content'
         self.attachment_field = 'Attached Content'
         self.section_field = 'School Section'
 
-        self.priority_usernames = ['lucyburden', 'dominicthomas', 'rebeccalouiseclentwo', 'richardbruford', 'nicholaslittle', 'yoonahlee', 'carmenmurray', 'neilmarshallinns']
+        self.priority_usernames = ['admin']
         self.setup_priorities()
 
     def post_to_wordpress(self, *args, **kwargs):
@@ -73,7 +70,7 @@ if __name__ == "__main__":
         if notices.settings.group_sec_all:  #TODO: CHANGE em_only TO SOMETHING MORE SENSIBLE
             notices.email_editing = False
             notices.agent_map = {
-                'group-sec-all@ssis-suzhou.net':['Whole School', 'Secondary']
+                'email@example.com':['Whole School', 'Secondary']
             }
         notices.email_to_agents()
     except Nothing:

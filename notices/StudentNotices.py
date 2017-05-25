@@ -23,8 +23,8 @@ class Student_Notices(ExtendMoodleDatabaseToAutoEmailer):
         Called by init
         """
         super().define()
-        self.sender = 'DragonNet Admin <lcssisadmin@student.ssis-suzhou.net>'
-        self.agents = ['Lucy Burden <lucyburden@ssis-suzhou.net>']
+        self.sender = 'Name <admin@example.com>'
+        self.agents = ['Name <name@example.com>']
         self.agent_map = {}
 
         self.search_date = "next day"
@@ -33,7 +33,7 @@ class Student_Notices(ExtendMoodleDatabaseToAutoEmailer):
         self.attachment_field = 'Attached Content'
         self.section_field = 'School Section'
 
-        self.priority_usernames = ['lucyburden']
+        self.priority_usernames = ['admin']
         self.setup_priorities()
 
     # def email_to_agents(self):
