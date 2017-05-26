@@ -6,25 +6,18 @@ class Object:
         
     # define common methods here
 
-#
-# Define global options here
-#
+
 @click.group()
-@click.pass_context
-def main(ctx):
-    # Doesn't do much now, but leave it as boilerplate for when there are global flags n such
-    ctx.obj = Object()
-
-
-@main.group()
 @click.argument('which', metavar="<student> or <teacher>")
 @click.option('--date_offset', default='1', help="1 for tomorrow, -1 for yesterday; default=1", metavar='<INT>')
 @click.option('--_date', help="Useful for debugging; today if not passed", metavar="<Dec 10 2015>")
-@click.pass_obj
-def notices(obj, which, _date=None, date_offset=None):
+@click.pass_context
+def notices(ctx, which, _date=None, date_offset=None):
     """
     Manage and launch the Student and Teacher notices stuff
     """
+    obj = ctx.obj = Object()
+
     obj.student_notices = 'student' in which
     obj.teacher_notices = 'teacher' in which
 
@@ -37,7 +30,7 @@ def notices(obj, which, _date=None, date_offset=None):
             month=time_object.tm_mon,
             day=time_object.tm_mday,
             year=time_object.tm_year
-            )
+        )
     else:
         # Calculate the date we need by date_offset
         date_object = datetime.date.today() + datetime.timedelta(days=int(date_offset))

@@ -9,8 +9,7 @@ import datetime
 import smtplib
 import subprocess
 
-
-class Nothing(Exception): pass
+from .Common import *
 
 
 # Following gives me 1st, 2nd, 3rd, 4th, etc
@@ -25,23 +24,27 @@ class ExtendMoodleDatabaseToAutoEmailer:
     """
     Converts a database on moodle into a useable system that emails users
     """
-    #TODO: Make it simple to get the new kid on the block
-    master_username = 'peterfowles'
-    shared_command_line_args_switches = ['verbose', 'use_samples', 'no_emails', 'update_date_fields']
-    shared_command_line_args_strings = {'passed_date':None}
 
-    def __init__(self, database_name, date):
+    def __init__(self, date):
         """
-        Populate self.found with legitimate entries
-        Works by looking for target date on the backend, and then finding all entries with matching dates...
-           ... and then adding any entries with any that share the same recordid
         """
-        super().__init__()
+        self.setup_date(date)
         # Setup
-        self.database_name = database_name
+
+        try:
+            self.NOTICES = (self.__class__.__name__.split('_')[0] + '_notices').upper()
+        except IndexError:
+            raise Exception("Your class name needs to have an underscore")
+
+        self.database_name = database_name = config_get_section_attribute(
+            self.NOTICES, ACTIVITY_NAME, required=True
+        )
+
         self.dnet = MoodleDBSession()
         self.database_id = self.dnet.get_column_from_row("data", 'id', name=self.database_name)
         self.setup_date(date)
+
+        self.init()
 
     def init(self):
         # Setup formatting templates for emails, can be overridden if different look required
@@ -59,6 +62,7 @@ class ExtendMoodleDatabaseToAutoEmailer:
         self.colon             = ":"
         self.attachment_header = 'Attachments'
         self.email_editing     = False
+        self.base_url          = config_get_section_attribute('MOODLE', 'base_url', required=True)
 
         self.server = config_get_section_attribute('EMAIL', 'domain')
         if not self.server:
@@ -81,11 +85,43 @@ class ExtendMoodleDatabaseToAutoEmailer:
             self.section_field_object = None
             self.section_field_default_value = None
         
-        self.start_date_field = StartDateField(self.database_name, 'Start Date')
-        self.end_date_field   = EndDateField(self.database_name, 'End Date')
+        start_date_str = config_get_section_attribute('DB_ACTIVITY', 'start_date', required=True)
+        end_date_str = config_get_section_attribute('DB_ACTIVITY', 'end_date', required=True)
+
+        self.start_date_field = StartDateField(self.database_name, start_date_str)
+        self.end_date_field   = EndDateField(self.database_name, end_date_str)
         self.process()
 
         self.edit_word = "Edit"
+
+    def define(self):
+        """
+        Called by init
+        """
+        self.initial_definitions()
+
+
+        self.sender = config_get_section_attribute(
+            self.NOTICES, SENDER
+        )
+        self.agents = config_get_section_attribute(
+            self.NOTICES, AGENTS, delimiter=' ', required=True
+        ) or []
+
+        self.agent_map = {}
+
+        self.search_date = config_get_section_attribute(
+            self.NOTICES, SEARCH_DAY
+        ) or NEXT_DAY
+
+        self.content_field = FULL_CONTENT
+        self.attachment_field = ATTACHED_CONTENT
+        self.section_field = SCHOOL_SECTION
+
+        self.priority_usernames = config_get_section_attribute(
+            self.NOTICES, PRIORITY_USERNAMES, delimiter=' '
+        ) or []
+        self.setup_priorities()
 
     def update_date_fields(self):
         self.start_date_field.update_menu_relative_dates( forward_days = (4 * 7) )
@@ -159,7 +195,7 @@ class ExtendMoodleDatabaseToAutoEmailer:
         for username in self.priority_usernames:
             self.priority_ids.append(self.dnet.get_column_from_row('user', 'id', username=username))
 
-    def define(self):
+    def initial_definitions(self):
         """
         OVERRIDE IN SUBCLASS
         """
@@ -183,7 +219,7 @@ class ExtendMoodleDatabaseToAutoEmailer:
         # If there are multiple sections, then define the name in Moodle's field here
 
         # search_date
-        self.search_date = "next day"
+        self.search_date = NEXT_DAY
         # one of three values "next day", "same day", or "day before" which determines how self.date is set up
         # "day before" is useful mostly for testing
 
@@ -243,13 +279,10 @@ class ExtendMoodleDatabaseToAutoEmailer:
         # TODO GET A BETTER IMPLEMENTATION OF THIS!
         #      edit_phrase CAN BE BETTER BECAUSE THE MODEL HAS MOST OF THIS INFO
         #      ESPECIALLY THE dbid_id VARIABLE
+
+
         if self.email_editing and hasattr(item, 'dbid'):
-            edit_phrase = '<br /><a href="http://dragonnet.ssis-suzhou.net/mod/data/view.php?d={}&mode=list&advanced=0&filter=1&advanced=1&f_{}={}">{}</a> '.format(
-                self.database_id,
-                self.model.dbid_id,
-                item.dbid,
-                self.edit_word)
-            
+            edit_phrase = f'<br /><a href="{self.base_url}/mod/data/view.php?d={self.database_id}&mode=list&advanced=0&filter=1&advanced=1&f_{self.model.dbid_id}={item.dbid}">{self.edit_word}</a> '            
         # NOW EDIT THE CONTENT SO THAT <p> TAGS ARE REMOVED, AND ANY SPACES ARE CONSOLIDATED
         content = re.sub(r'</*p>', '', content)
         content = re.sub(r'\n', ' ', content)
@@ -330,7 +363,7 @@ class ExtendMoodleDatabaseToAutoEmailer:
         self.html("{end_html_tag}")
 
     def print_email(self, recipient_list, format=True):
-        if format:
+        if format:  
             self.prepare_formatting()
 
         print("Email from {} to: {}".format(self.sender, recipient_list))
@@ -359,15 +392,15 @@ class ExtendMoodleDatabaseToAutoEmailer:
         """
         if format:
             self.prepare_formatting()
-        path_to_wordpress = config_get_section_attribute('SITES', 'path_to_docroot', required=True)
-        path_to_wpcli = config_get_section_attribute('SITES', 'path_to_wpcli', required=True)
+        path_to_wordpress = config_get_section_attribute('WORDPRES', 'path_to_docroot', required=True)
+        path_to_wpcli = config_get_section_attribute('WORDPRESS', 'path_to_wpcli', required=True)
         if not url:
-            wordpress_url = config_get_section_attribute('SITES', 'url', required=True)
+            wordpress_url = config_get_section_attribute('WORDPRESS', 'base_url', required=True)
         else:
             wordpress_url = url
 
         # Get the user information first
-        command = "{} --path={} user get {} --format=json ".format(path_to_wpcli, path_to_wordpress, author)
+        command = f"{path_to_wpcli} --path={path_to_wordpress} user get {author} --format=json "
         to_call = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         result, err = to_call.communicate()
         import json
@@ -387,20 +420,18 @@ class ExtendMoodleDatabaseToAutoEmailer:
         replace_apostrophes = "'\\''"
         content = content.replace("'", replace_apostrophes).replace('\r', ' ')   # escape apostrophes for bash
 
-        date_as_string = '{}-{}-{} {}:{}:00'.format(self.date.year, self.date.month, self.date.day, hour.tm_hour, hour.tm_min)
+        date_as_string = f'{self.date.year}-{self.date.month}-{self.date.day} {hour.tm-hour}:{hour.tm_min}:00'
 
-        d = {
-            'title': self.get_subject(),   # remove the 'Student Notices for' part
-            'author': user['ID'],
-            'content': content,
-            'date': date_as_string,
-            'blog': blog,
-            'url': wordpress_url,
-            'path_to_wpcli': path_to_wpcli,
-            'path_to_docroot': path_to_wordpress
-            }
+        title = self.get_subject()   # remove the 'Student Notices for' part
+        author = user['ID']
+        content = content
+        date = date_as_string,
+        blog = blog
+        url = wordpress_url
+        path_to_wpcli = path_to_wpcli
+        path_to_docroot = path_to_wordpress
 
-        command = """{path_to_wpcli} post create --path={path_to_docroot} --post_type=post --post_title='{title}' --post_content='{content}' --post_author={author} --post_status=future --post_date='{date}' --url={url}/{blog}""".format(**d)
+        command = f"""{path_to_wpcli} post create --path={path_to_docroot} --post_type=post --post_title='{title}' --post_content='{content}' --post_author={author} --post_status=future --post_date='{date}' --url={url}/{blog}"""
         subprocess.call(command, shell=True)
 
     def get_subject(self, **kwargs):
@@ -413,5 +444,6 @@ class ExtendMoodleDatabaseToAutoEmailer:
         """
         Can be used by formatting engine to make a list
         """
-        return "{}{}{}".format(self.begin_list_tag, s.strip('\n'), self.end_list_tag)
+        stripped = s.strip('\n')
+        return f"{self.begin_list_tag}{stripped}{self.end_list_tag}"
 
