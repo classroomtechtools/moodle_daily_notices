@@ -10,12 +10,12 @@ Command line program that augments a database activity.
 
 Requires Python 3.6, as always with Python always use a virtual environment. I recommend [pyenv](https://github.com/pyenv/pyenv) with [virtualenv](https://github.com/pyenv/pyenv-virtualenv) plugin, and instructions using that follows
 
-- pyenv install 3.6.0
-- git clone https://github.com/classroomtechtools/moodle_daily_notices.git
-- cd moodle_daily_notices
-- pyenv virtualenv 3.6.0 moodle_daily_notices
-- pyenv local moodle_daily_notices
-- pip install -e .
+1. `pyenv install 3.6.0`
+1. `git clone https://github.com/classroomtechtools/moodle_daily_notices.git`
+1. `cd moodle_daily_notices`
+1. `pyenv virtualenv 3.6.0 moodle_daily_notices`
+1. `pyenv local moodle_daily_notices`
+1. `pip install -e .`
 
 You should then see output indicating that the software has been installed into the virtualenv. 
 
@@ -23,17 +23,17 @@ You should then see output indicating that the software has been installed into 
 
 If improvements are made then you may wish to update the software:
 
-- cd /path/to/moodle_daily_notices
-- git pull origin master
-- pip install -e .
+1. `cd /path/to/moodle_daily_notices`
+1. `git pull origin master`
+1. `pip install -e .`
 
 #### Setup
 
 You need to have a settings.ini file with the appropriate content.
 
-- cp settings_default.ini settings.ini
-- nano settings_default.ini
-- (edit the file according to your needs)
+1. `cp settings_default.ini settings.ini`
+1. `nano settings_default.ini`
+1. (edit the file according to your needs)
 
 There is a place for student and teacher notices, but you could have just one if desired. The "db_activity" attributes have to coorespond to the database activity created on the Moodle side. 
 
@@ -41,11 +41,11 @@ There is a place for student and teacher notices, but you could have just one if
 
 Entry point (at the moment) for sending the output as an email (agent):
 
-- notices launch teacher|student --email
+- `notices launch teacher|student --email`
 
 Entry point (at the moment) for updating the "Start Date" and "End Date" fields is:
 
-- notices launch teacher|student --update_date_fields
+- `notices launch teacher|student --update_date_fields`
 
 ## Moodle side
 
