@@ -35,11 +35,11 @@ You need to have a settings.ini file with the appropriate content.
 - nano settings_default.ini
 - (edit the file according to your needs)
 
-There is a place for student and teacher notices, but you could have just one if desired. The "db_activity" attributes have to coorespond to the database activity created on the Moodle side.
+There is a place for student and teacher notices, but you could have just one if desired. The "db_activity" attributes have to coorespond to the database activity created on the Moodle side. 
 
 #### Running
 
-Entry point (at the moment) for outputing the emails is, this will not work unless Moodle side is also set up (below):
+Entry point (at the moment) for sending the output as an email (agent):
 
 - notices launch teacher|student --email
 
@@ -55,14 +55,18 @@ Create a database activity, and note the name. That name needs to be input into 
 
 Note that start date and end date are NOT date fields but instead is a pop-up. The values are populated with the --update_date_fields command (above).
 
-## Sample Output
+Also note that text in the Attachment field is placed at the bottom of all the notices.
 
-This is an sample output.
+## Output
+
+#### Sample Output
+
+The entires are organized by section:
 
 <img src="http://classroomtechtools.github.io/moodle_daily_notices/notices_sample.png" />
 
-While the default behaviour can be emailed to a group, it is also possible to publish it to a WordPress site or multi-site.
+If you define `priority_usernames` in the settings.ini file, those usernames will be given a higher priority and thus appear before all the others.
 
 ## Customization or Assistance
 
-Please contact us for further customizations. We can help you install it in a sandbox for your previewing needs.
+Please contact us for further customizations. We can help you install it in a sandbox for your previewing needs. We can customize any of the default behaviour, such as publishing to a WordPress site instead of (or in addition to) email.
