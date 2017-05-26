@@ -10,8 +10,9 @@ Command line program that augments a database activity.
 
 Requires Python 3.6, as always with Python always use a virtual environment. I recommend [pyenv](https://github.com/pyenv/pyenv) with [virtualenv](https://github.com/pyenv/pyenv-virtualenv) plugin, and instructions using that follows
 
+
 - pyenv install 3.6.0
-- git clone ...
+- git clone https://github.com/classroomtechtools/moodle_daily_notices.git
 - cd moodle_daily_notices
 - pyenv virtualenv 3.6.0 moodle_daily_notices
 - pyenv local moodle_daily_notices
