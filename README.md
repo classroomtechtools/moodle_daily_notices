@@ -31,8 +31,9 @@ If improvements are made then you may wish to update the software:
 
 You need to have a settings.ini file with the appropriate content.
 
+1. `cd /path/to/moodle_daily_notices`
 1. `cp settings_default.ini settings.ini`
-1. `nano settings_default.ini`
+1. `nano settings.ini`
 1. (edit the file according to your needs)
 
 There is a place for student and teacher notices, but you could have just one if desired. The "db_activity" attributes have to coorespond to the database activity created on the Moodle side. 
