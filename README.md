@@ -31,7 +31,7 @@ Entry point (at the moment) for updating the "Start Date" and "End Date" fields 
 
 Create a database activity, and note the name. That name needs to be input into the code in /notices/TeacherNotices.py line 20 or /notices/StudentNotices.py line 17 (the __init__ methods). The activity should have the following fields (name has to be exact):
 
-![Fields Names and Types](http://url/to/img.png | width=100)
+<img src="http://http://classroomtechtools.github.io/moodle_daily_notices/fields.png" width="100" />
 
 Note that start date and end date are NOT date fields but instead is a pop-up. The values are populated with the --update_date_fields command (above).
 
