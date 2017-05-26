@@ -40,14 +40,13 @@ while current_working_list:
     settings_list.append( here + '/settings.ini' )
     current_working_list.pop(-1)
 
-config = configparser.ConfigParser(defaults={'dry_run':True, 'verbose':True})
+config = configparser.ConfigParser(defaults={'verbose':False})
 results = config.read(settings_list)
 if not results:
     print("Some error occurred when attempting to find settings.ini file...exiting")
     exit()
 
 verbose = config.getboolean('DEFAULTS', 'verbose')
-dry_run = config.getboolean('DEFAULTS', 'dry_run')
 
 email_server = None
 if config.has_section("EMAIL"):
@@ -58,7 +57,7 @@ if not email_server:
 def config_get_logging_level():
     return config_get_section_attribute('LOGGING', 'log_level')
 
-def config_get_section_attribute(section, attribute, required=False):
+def config_get_section_attribute(section, attribute, required=False, delimiter=None):
     """ returns None if not present, otherwise returns its value """
     if required:
         requires_setting(section, attribute)
@@ -68,9 +67,14 @@ def config_get_section_attribute(section, attribute, required=False):
         if section in ['DEFAULTS', 'DEBUGGING']:
             return config.getboolean(section, attribute)
         else:
-            return config[section].get(attribute)
+            ret = config[section].get(attribute)
+            if ret is not None and delimiter:
+                return [i for i in ret.split(delimiter) if i]
+            else:
+                return ret
     except configparser.NoOptionError:
         return None
+
 
 def requires_setting(section, attribute):
     """ Declare your settings needs this way, opt-in """
@@ -113,4 +117,4 @@ def verbosity(passed):
 #     stdout_handler.setLevel(logging.INFO)
 #     root.addHandler(stdout_handler)
 
-__all__ = [verbose, verbosity, dry_run, email_server, config, requires_setting]
+__all__ = [verbose, verbosity, email_server, config, requires_setting]

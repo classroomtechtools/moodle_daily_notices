@@ -18,7 +18,7 @@ setup(
         ],
     entry_points='''
         [console_scripts]
-        notices=cli.main:main
+        notices=cli.main:notices
     ''',
     long_description = """\
 TODO: DESCRIBE THIS!
