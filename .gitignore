@@ -1,3 +1,4 @@
 .python-version
 *.egg-info
 settings.ini
+__pycache__
